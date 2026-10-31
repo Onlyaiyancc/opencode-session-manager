@@ -1,148 +1,151 @@
-# OpenCode 会话管理器
+# OpenCode Session Manager
+
+**English** | [简体中文](README.zh-CN.md)
 
 [![Tests](https://github.com/Onlyaiyancc/opencode-session-manager/actions/workflows/tests.yml/badge.svg)](https://github.com/Onlyaiyancc/opencode-session-manager/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
-[![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](#环境要求)
+[![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](#requirements)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-轻量、本机运行的中文 OpenCode 会话管理网页。搜索和预览对话，按项目、更新时间整理历史，支持重命名、归档及批量删除。
+A lightweight, local web interface for managing OpenCode conversations. Search and preview sessions, filter by project or last update, rename conversations, archive them, and delete selected sessions in bulk.
 
-使用 Python 标准库与原生 HTML/CSS/JavaScript，无需安装第三方 Python 包或前端构建依赖。
+Built with the Python standard library and plain HTML/CSS/JavaScript. No third-party Python packages or frontend build dependencies are required.
 
-> 独立社区工具，目前完整管理功能适配 **Windows 上的 OpenCode Desktop 1.19.5**。运行时复用本机已安装的 OpenCode，不附带其程序或用户数据；其他版本尚未验证。
+> An independent community tool. Full management functionality is currently tested with **OpenCode Desktop 1.19.5 on Windows**. It reuses your locally installed OpenCode runtime and does not bundle OpenCode or user data. Other versions have not been verified.
 
-## 目录
+## Contents
 
-- [功能特性](#功能特性)
-- [环境要求](#环境要求)
-- [快速开始](#快速开始)
-- [使用说明](#使用说明)
-- [配置说明](#配置说明)
-- [项目结构](#项目结构)
-- [开发与测试](#开发与测试)
-- [常见问题](#常见问题)
-- [参与贡献](#参与贡献)
-- [许可证](#许可证)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Quick start](#quick-start)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Project structure](#project-structure)
+- [Development and testing](#development-and-testing)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+- [License](#license)
 
-## 功能特性
+## Features
 
-- **中文界面**：导航、筛选、日期、状态和操作确认均使用中文。
-- **会话整理**：搜索标题和项目路径，筛选归档状态、目录、更新时间及子会话。
-- **轻量预览**：会话与消息分页加载，排除大型分块和嵌入附件，长文本明确标记截断。
-- **常用管理**：重命名、归档和取消归档，通过 OpenCode 自身接口保存修改。
-- **批量删除**：先列出包含子会话的完整范围，再输入「删除 N」确认；执行前重新检查范围是否变化。
-- **文本导出**：导出可读的 Markdown 对话文本，明确标记省略和截断内容。
-- **本机运行**：服务仅监听回环地址，前端不加载远程脚本、字体或图片。
+- **Chinese-language interface:** Chinese navigation, filters, dates, status messages, and operation confirmations.
+- **Session organization:** Search titles and project paths; filter by archive status, directory, update date, and sub-session visibility.
+- **Lightweight previews:** Paginated sessions and messages, with oversized parts and embedded attachments excluded. Long text is explicitly marked as truncated.
+- **Common operations:** Rename, archive, and unarchive sessions through OpenCode's own API.
+- **Bulk deletion:** Review the complete scope, including child sessions, then type `删除 N` (delete N) to confirm. The selection is checked again before deletion.
+- **Text export:** Download readable Markdown transcripts with explicit omission and truncation notices.
+- **Local interface:** The service listens only on loopback. The frontend loads no remote scripts, fonts, or images.
 
-## 环境要求
+## Requirements
 
-| 项目 | 要求 |
+| Component | Requirement |
 | --- | --- |
-| 操作系统 | 完整管理功能需要 Windows |
-| OpenCode | 已安装 OpenCode Desktop 1.19.5 |
-| Python | 3.12 或更新版本，内置 SQLite 3.43 或更新版本 |
-| 浏览器 | 支持现代 JavaScript 的浏览器 |
-| 普通测试 | 无需安装 OpenCode，可在 Windows/Linux 运行 |
+| Operating system | Windows for full management functionality |
+| OpenCode | OpenCode Desktop 1.19.5 installed locally |
+| Python | Python 3.12+ with SQLite 3.43+ |
+| Browser | A browser supporting modern JavaScript |
+| Unit tests | Run on Windows/Linux without OpenCode installed |
 
-未来 OpenCode 版本可能调整内部模块或数据库结构，升级后请先确认兼容性。
+Future OpenCode versions may change internal modules or the database schema. Verify compatibility before upgrading.
 
-## 快速开始
+## Quick start
 
-### 1. 获取项目
+### 1. Get the project
 
-克隆仓库，或从 GitHub 下载 ZIP 后解压：
+Clone the repository, or download and extract its ZIP from GitHub:
 
 ```powershell
 git clone https://github.com/Onlyaiyancc/opencode-session-manager.git
 cd opencode-session-manager
 ```
 
-### 2. 启动管理器
+### 2. Start the manager
 
-Windows 用户可双击根目录的 **启动会话管理.cmd**。脚本优先使用现有 Anaconda Python，否则使用系统的 `python`。
+On Windows, double-click [启动会话管理.cmd](启动会话管理.cmd) in the project root. The launcher prefers an existing Anaconda Python installation and otherwise uses `python` from your system.
 
-也可以在终端运行：
+Alternatively, run:
 
 ```powershell
 python main.py --open
 ```
 
-浏览器将打开 **[http://127.0.0.1:8787](http://127.0.0.1:8787)**。再次启动时，会复用该端口上已运行的管理器。
+Your browser opens **[http://127.0.0.1:8787](http://127.0.0.1:8787)**. Starting the launcher again reuses the manager already running on that port.
 
-### 3. 关闭管理器
+### 3. Stop the manager
 
-使用期间保持启动窗口运行。点击网页右上角的关闭按钮，或在启动窗口按 `Ctrl+C`，即可停止服务。
+Keep the launcher window open while using the application. Click the close button in the page's top-right corner, or press `Ctrl+C` in the launcher window, to stop the service.
 
-## 使用说明
+## Usage
 
-1. 在左侧选择会话视图或项目，使用搜索框和日期条件缩小范围。
-2. 点击会话查看分页预览，并按需重命名、归档或导出。
-3. 批量删除时勾选会话，核对完整清单和子会话数量，再输入对应确认文字。
+1. Choose a session view or project in the sidebar. Narrow the list with search and the update-date filter.
+2. Select a session to preview its messages, rename it, archive it, or export readable text.
+3. For bulk deletion, select sessions, review the full list and child-session count, then enter the displayed confirmation text.
 
-**修改会话前，请先关闭 OpenCode 桌面端**，避免另一个进程同时在会话中执行任务。浏览和预览是只读操作，管理服务仅在需要时启动。
+**Close OpenCode Desktop before editing sessions** so another process cannot run tasks in the same conversations. Browsing and previews are read-only; the management service starts only when needed.
 
-- 日期筛选使用**北京时间当天 00:00**，仅匹配严格早于该时刻的更新时间。
-- 「超过一个月未更新」减去一个日历月，月末自动收敛到上个月最后一天。
-- 删除父会话会包含其子会话，实际影响范围以确认清单为准。
-- Markdown 导出会省略大型分块、嵌入附件以及超出预览限额的内容，**不能作为完整备份**。
-- 删除记录不会自动收缩数据库文件。不要在 OpenCode 或管理器运行时手动执行 `VACUUM`。
+- Date filters use **00:00 Beijing time**, matching sessions updated strictly before the selected cutoff.
+- The “older than a month” filter subtracts one calendar month and clamps month-end dates to the previous month's last day.
+- Deleting a parent session includes its child sessions. Review the confirmation list for the exact scope.
+- Markdown exports omit oversized parts, embedded attachments, and content beyond preview limits. **They are not full backups.**
+- Deleting records does not automatically shrink the database file. Do not run `VACUUM` while OpenCode or this manager is running.
 
-## 配置说明
+## Configuration
 
-默认数据库为 `%USERPROFILE%\.local\share\opencode\opencode.db`。
+The default database is `%USERPROFILE%\.local\share\opencode\opencode.db`.
 
-| 参数或环境变量 | 默认值 / 用途 |
+| Option or environment variable | Default / purpose |
 | --- | --- |
-| `--db` / `OPENCODE_DB` | 指定 OpenCode 数据库；`--db` 优先 |
-| `--port` | 网页端口，默认 `8787` |
-| `--open` | 启动后打开浏览器 |
-| `OPENCODE_DESKTOP_DIR` | 桌面端安装目录，默认 `%LOCALAPPDATA%\Programs\@opencode-aidesktop` |
-| `LOCALAPPDATA` | 运行日志默认位于其下的 `OpenCodeSessionManager` 目录 |
+| `--db` / `OPENCODE_DB` | Select the OpenCode database; `--db` takes precedence |
+| `--port` | Web server port; defaults to `8787` |
+| `--open` | Open the browser after startup |
+| `OPENCODE_DESKTOP_DIR` | Desktop installation directory; defaults to `%LOCALAPPDATA%\Programs\@opencode-aidesktop` |
+| `LOCALAPPDATA` | Runtime logs default to its `OpenCodeSessionManager` subdirectory |
 
-例如，使用其他端口：
+For example, use another port:
 
 ```powershell
 python main.py --port 8788 --open
 ```
 
-程序凭证随机生成，仅保存在进程内存中，不返回网页。请求经过 Host、Origin 和防跨站令牌检查；会话文本按文本渲染，不作为 HTML 执行。
+Service credentials are generated randomly, kept in process memory, and never returned to the page. Requests are checked against Host, Origin, and an anti-CSRF token. Conversation content is rendered as text, never executed as HTML.
 
-## 项目结构
+## Project structure
 
 ```text
 opencode-session-manager/
-├── main.py                 # 命令行启动入口
-├── 启动会话管理.cmd          # Windows 双击启动
-├── README.md
+├── main.py                 # Command-line entry point
+├── 启动会话管理.cmd          # Windows launcher
+├── README.md               # Default English documentation
+├── README.zh-CN.md         # Simplified Chinese documentation
 ├── LICENSE
-├── app/                    # 应用实现与网页资源
-│   ├── server.py           # 本机 HTTP 服务和管理操作
-│   ├── store.py            # 只读查询、分页预览和导出
-│   ├── bridge.py           # OpenCode 后台服务与认证
-│   ├── official-server.cjs # 加载已安装的 OpenCode 模块
-│   └── static/             # HTML、CSS、JavaScript 和图标
-├── tests/                  # 单元、HTTP 和可选集成测试
-├── docs/                   # 架构说明与更新记录
-└── .github/workflows/      # 自动化检查
+├── app/                    # Application and frontend assets
+│   ├── server.py           # Local HTTP service and management operations
+│   ├── store.py            # Read-only queries, previews, and exports
+│   ├── bridge.py           # OpenCode service lifecycle and authentication
+│   ├── official-server.cjs # Loads the installed OpenCode modules
+│   └── static/             # HTML, CSS, JavaScript, and icons
+├── tests/                  # Unit, HTTP, and optional integration tests
+├── docs/                   # Architecture notes and changelog
+└── .github/workflows/      # Automated checks
 ```
 
-更多设计说明见 [架构文档](docs/ARCHITECTURE.md)，历史变更见 [更新记录](docs/CHANGELOG.md)。
+See the [architecture guide](docs/ARCHITECTURE.md) and [changelog](docs/CHANGELOG.md) for more details. These additional documents are currently in Chinese.
 
-## 开发与测试
+## Development and testing
 
-从项目根目录运行普通测试：
+Run the default test suite from the project root:
 
 ```powershell
 python -m unittest discover -v
 ```
 
-普通测试不依赖 OpenCode。GitHub Actions 覆盖 Windows/Linux 与 Python 3.12/3.13，并检查前端 JavaScript 语法；本机检查前端语法需要 Node.js：
+Unit tests do not require OpenCode. GitHub Actions runs them on Windows/Linux with Python 3.12/3.13 and checks frontend JavaScript syntax. Checking JavaScript locally requires Node.js:
 
 ```powershell
 node --check app/static/app.js
 ```
 
-本机安装了受支持的 OpenCode 后，可显式启用集成测试：
+If a supported OpenCode installation is available locally, explicitly enable integration tests:
 
 ```powershell
 $env:OPENCODE_RUN_INTEGRATION = '1'
@@ -150,30 +153,30 @@ python -m unittest -v tests.test_official
 Remove-Item Env:\OPENCODE_RUN_INTEGRATION
 ```
 
-集成测试在新建的临时数据库中验证重命名、归档和包含子会话的删除，不修改真实会话。普通测试覆盖筛选边界、受限预览、导出标记、删除范围变化、跨站防护和页面元素绑定。
+Integration tests use a new temporary database to verify renaming, archiving, and deletion with child sessions. They do not modify your real conversations. Unit tests cover filtering boundaries, bounded previews, export notices, changed deletion selections, cross-origin protections, and page-element bindings.
 
-## 常见问题
+## FAQ
 
-### 页面能打开，但修改失败？
+### The page opens, but editing fails. What should I check?
 
-先关闭 OpenCode 桌面端，再重试。确认已安装受支持版本；如果安装目录不同，设置 `OPENCODE_DESKTOP_DIR`。详细运行日志位于 `%LOCALAPPDATA%\OpenCodeSessionManager`。
+Close OpenCode Desktop and try again. Check that the supported version is installed. If its installation path differs, set `OPENCODE_DESKTOP_DIR`. Runtime logs are available under `%LOCALAPPDATA%\OpenCodeSessionManager`.
 
-### 端口被占用？
+### What if the port is already in use?
 
-关闭之前的管理器，或用 `--port 8788` 指定其他端口。
+Stop the previous manager, or select another port with `--port 8788`.
 
-### 新版 OpenCode 可以直接使用吗？
+### Can I use a newer OpenCode version?
 
-目前仅验证了 Desktop 1.19.5 的内部服务和旧版 `session/message/part/event_sequence` 数据结构。其他版本需要单独验证，不保证兼容。
+Only Desktop 1.19.5's internal service and legacy `session/message/part/event_sequence` schema have been verified. Compatibility with other versions is not guaranteed and requires separate testing.
 
-## 参与贡献
+## Contributing
 
-欢迎通过 [Issues](https://github.com/Onlyaiyancc/opencode-session-manager/issues) 反馈问题或提出改进，也欢迎提交 Pull Request。修改后请运行相关测试，并同步更新使用说明。
+Bug reports, suggestions, and pull requests are welcome. Open an [issue](https://github.com/Onlyaiyancc/opencode-session-manager/issues), run the relevant tests after making changes, and update both README language versions when behavior or setup instructions change.
 
-数据库、凭据、日志、导出和备份已通过 `.gitignore` 排除。提交 Issue 或代码时，请去除真实对话、账号信息、密钥和含私人标题的截图。
+Databases, credentials, logs, exports, and backups are excluded through `.gitignore`. Remove real conversations, account information, secrets, and screenshots containing private titles before submitting issues or code.
 
-## 许可证
+## License
 
-本项目采用 [MIT 许可证](LICENSE)。OpenCode 及其运行时组件属于上游作者，遵循各自许可证。
+This project is licensed under the [MIT License](LICENSE). OpenCode and its runtime components belong to their upstream authors and retain their respective licenses.
 
-接口实现参考 [OpenCode 1.19.5 会话接口源码](https://github.com/anomalyco/opencode/blob/v1.19.5/packages/opencode/src/server/routes/instance/httpapi/groups/session.ts)。
+The implementation references the [OpenCode 1.19.5 session API source](https://github.com/anomalyco/opencode/blob/v1.19.5/packages/opencode/src/server/routes/instance/httpapi/groups/session.ts).
