@@ -4,9 +4,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bridge import OfficialBridge
-from store import Store
-from server import Manager
+from app.bridge import OfficialBridge
+from app.store import Store
+from app.server import Manager
 
 
 @unittest.skipUnless(os.name=='nt' and os.environ.get('OPENCODE_RUN_INTEGRATION')=='1',

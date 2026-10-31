@@ -12,8 +12,8 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from bridge import OfficialBridge
-from store import Store
+from .bridge import OfficialBridge
+from .store import Store
 
 ROOT = Path(__file__).resolve().parent
 

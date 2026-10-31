@@ -1,17 +1,25 @@
 import json
 import re
 import sqlite3
+import subprocess
+import sys
 import threading
 import unittest
 import urllib.error
 import urllib.request
 
-from server import Handler, Manager, ThreadingHTTPServer
-from server import ROOT
-import test_manager
+from app.server import Handler, Manager, ThreadingHTTPServer, ROOT
+from tests import test_store
 
 
 class HttpTests(unittest.TestCase):
+    def test_root_entrypoint_works_outside_project_directory(self):
+        result=subprocess.run([sys.executable,str(ROOT.parent/'main.py'),'--help'],
+            cwd=self.fixture.temp.name,capture_output=True,text=True,timeout=10)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('--db',result.stdout)
+        self.assertIn('--port',result.stdout)
+
     def test_translated_html_preserves_javascript_element_ids(self):
         html=(ROOT/'static/index.html').read_text(encoding='utf-8')
         script=(ROOT/'static/app.js').read_text(encoding='utf-8')
@@ -20,7 +28,7 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(required-ids,set())
 
     def setUp(self):
-        self.fixture=test_manager.StoreTests()
+        self.fixture=test_store.StoreTests()
         self.fixture.setUp()
         self.manager=Manager(self.fixture.path)
         self.server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
@@ -51,7 +59,7 @@ class HttpTests(unittest.TestCase):
             self.assertLess(len(data),30000)
             self.assertNotIn(b'base64,',data)
         with self.assertRaises(urllib.error.HTTPError) as error:
-            self.request('/server.py')
+            self.request('/app/server.py')
         self.assertEqual(error.exception.code,404)
 
     def test_origin_host_and_csrf(self):
